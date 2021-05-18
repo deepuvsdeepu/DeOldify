@@ -41,8 +41,8 @@ In the "Runtime" menu for the notebook window, select "Change runtime type." Ens
 # NOTE:  This must be the first call in order to work properly!
 # choices:  CPU, GPU0...GPU7
 import warnings
-from deoldify.visualize import *
-import fastai
+import deoldify.visualize as vs
+# from deoldify.visualize import *
 import torch
 from deoldify import device
 from deoldify.device_id import DeviceId
@@ -62,7 +62,7 @@ warnings.filterwarnings("ignore", category=UserWarning,
 
 # !wget https://media.githubusercontent.com/media/jantic/DeOldify/master/resource_images/watermark.png -O ./resource_images/watermark.png
 
-colorizer = get_image_colorizer(artistic=True)
+colorizer = None # vs.get_image_colorizer(artistic=True)
 
 """#◢ Instructions
 
@@ -86,12 +86,14 @@ You can evaluate how well the image is rendered at each render_factor by using t
 """
 
 # source_url = 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fc1.staticflickr.com%2F3%2F2475%2F3808673138_5e653ffd1d_b.jpg&f=1&nofb=1' #@param {type:"string"}
-render_factor = 35  # @param {type: "slider", min: 7, max: 40}
-watermarked = True  # @param {type:"boolean"}
 
-
-def colorize_image(source_path):
+def colorize_image(source_path, render_factor = 35, watermarked = False):
     if source_path is not None and source_path != '':
+        global colorizer
+        # colorizer = colorizer if None else vs.get_image_colorizer(artistic=True)
+        if colorizer is None:
+            colorizer = vs.get_image_colorizer(artistic=False)
+        
         if source_path.startswith('http'):
             image = colorizer._get_image_from_url(source_path)
         else:
@@ -101,11 +103,11 @@ def colorize_image(source_path):
         image.save(image_path)
         colorizer.plot_transformed_image(image_path,
                                          figsize=(20, 20),
-                                         render_factor=None,
+                                         render_factor=render_factor,
                                          display_render_factor=False,
                                          compare=False,
                                          post_process=False,
-                                         watermarked=False,)
+                                         watermarked=watermarked,)
         # show_image_in_notebook(image_path)
     else:
         print('Provide an image url and try again.')
